@@ -7,7 +7,7 @@
     <ProjectGuid>{367BA351-04CD-4556-85B1-AD02284AC0F0}</ProjectGuid>
     <OutputType>winmdobj</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FBM.UWP.Background</RootNamespace>
+    <RootNamespace>FBM.Background</RootNamespace>
     <AssemblyName>FBM.UWP.Background</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>

@@ -122,6 +122,12 @@
   <ItemGroup>
     <Folder Include="Views\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FBM.UWP.Background\FBM.UWP.Background.csproj">
+      <Project>{367ba351-04cd-4556-85b1-ad02284ac0f0}</Project>
+      <Name>FBM.UWP.Background</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="..\FBM.Shared\FBM.Shared.projitems" Label="Shared" />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

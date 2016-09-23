@@ -16,6 +16,8 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using FBM.Views;
+using Windows.ApplicationModel.Background;
+using FBM.Background;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=391641
 
@@ -103,7 +105,48 @@ namespace FBM
 
             // Ensure the current window is active
             Window.Current.Activate();
+
+            // Initialize background tasks
+            var trigger = new TimeTrigger(15, false);
+            var task = RegisterBackgroundTask("FbmOne",
+                                    typeof(FbmBackgroundTask).FullName,
+                                    trigger,
+                                    null);
         }
+
+        private static IBackgroundTaskRegistration RegisterBackgroundTask(string name,
+                                                                  string entryPoint,
+                                                                  IBackgroundTrigger trigger,
+                                                                  IBackgroundCondition[] conditions = null)
+        {
+            foreach (var task in BackgroundTaskRegistration.AllTasks.Values)
+            {
+                if (task.Name == name)
+                {
+                    return task;
+                }
+            }
+
+            var builder = new BackgroundTaskBuilder
+            {
+                Name = name,
+                TaskEntryPoint = entryPoint
+            };
+            builder.SetTrigger(trigger);
+
+            if (conditions != null)
+            {
+                foreach (var condition in conditions)
+                {
+                    builder.AddCondition(condition);
+                }
+            }
+
+            return builder.Register();
+        }
+
+
+
 
         /// <summary>
         /// Restores the content transitions after the app has launched.
