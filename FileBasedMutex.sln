@@ -17,6 +17,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FBM.Phone.Background", "FBM
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FBM.Shared.Background", "FBM.Share.Background\FBM.Shared.Background.shproj", "{2B9FA061-190C-4C77-9A58-4AE5FBD10034}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{71DCF49E-BD34-413C-9BFC-03BFE256527E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{747DE2FA-0775-46D6-A947-8706016E4A1B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FBM.Shared.Services", "FBM.Shared.Services\FBM.Shared.Services.shproj", "{CA31992B-DE31-4BB1-85B5-AEB5CC3DD02D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FBM.Kit", "FBM.Kit\FBM.Kit.csproj", "{F48CF3C7-A589-4A6E-87B4-24B75595EC82}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		FBM.Share.Background\FBM.Share.Background.projitems*{2b9fa061-190c-4c77-9a58-4ae5fbd10034}*SharedItemsImports = 13
@@ -24,7 +32,9 @@ Global
 		FBM.Share.Background\FBM.Share.Background.projitems*{367ba351-04cd-4556-85b1-ad02284ac0f0}*SharedItemsImports = 4
 		FBM.Shared\FBM.Shared.projitems*{5a76c535-4e1f-4952-b808-08094c89630d}*SharedItemsImports = 4
 		FBM.Share.Background\FBM.Share.Background.projitems*{769720c8-4db5-4685-a8e2-e2f38cf600e3}*SharedItemsImports = 4
+		FBM.Shared.Services\FBM.Shared.Services.projitems*{769720c8-4db5-4685-a8e2-e2f38cf600e3}*SharedItemsImports = 4
 		FBM.Shared\FBM.Shared.projitems*{b2b67e0e-4971-4a45-b5c5-526409396e57}*SharedItemsImports = 13
+		FBM.Shared.Services\FBM.Shared.Services.projitems*{ca31992b-de31-4bb1-85b5-aeb5cc3dd02d}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,13 +123,34 @@ Global
 		{769720C8-4DB5-4685-A8E2-E2F38CF600E3}.Release|x64.Build.0 = Release|Any CPU
 		{769720C8-4DB5-4685-A8E2-E2F38CF600E3}.Release|x86.ActiveCfg = Release|x86
 		{769720C8-4DB5-4685-A8E2-E2F38CF600E3}.Release|x86.Build.0 = Release|x86
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Debug|ARM.Build.0 = Debug|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Debug|x64.Build.0 = Debug|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Debug|x86.Build.0 = Debug|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Release|ARM.ActiveCfg = Release|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Release|ARM.Build.0 = Release|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Release|x64.ActiveCfg = Release|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Release|x64.Build.0 = Release|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Release|x86.ActiveCfg = Release|Any CPU
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{B2B67E0E-4971-4A45-B5C5-526409396E57} = {747DE2FA-0775-46D6-A947-8706016E4A1B}
+		{5A76C535-4E1F-4952-B808-08094C89630D} = {747DE2FA-0775-46D6-A947-8706016E4A1B}
+		{30F5F76D-7D1A-4D3F-BEB3-E231D2212E98} = {747DE2FA-0775-46D6-A947-8706016E4A1B}
 		{367BA351-04CD-4556-85B1-AD02284AC0F0} = {8A7756A6-B97D-42C5-AD50-97C31C0245D3}
 		{769720C8-4DB5-4685-A8E2-E2F38CF600E3} = {8A7756A6-B97D-42C5-AD50-97C31C0245D3}
 		{2B9FA061-190C-4C77-9A58-4AE5FBD10034} = {8A7756A6-B97D-42C5-AD50-97C31C0245D3}
+		{CA31992B-DE31-4BB1-85B5-AEB5CC3DD02D} = {71DCF49E-BD34-413C-9BFC-03BFE256527E}
+		{F48CF3C7-A589-4A6E-87B4-24B75595EC82} = {71DCF49E-BD34-413C-9BFC-03BFE256527E}
 	EndGlobalSection
 EndGlobal

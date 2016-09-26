@@ -110,6 +110,12 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FBM.Kit\FBM.Kit.csproj">
+      <Project>{f48cf3c7-a589-4a6e-87b4-24b75595ec82}</Project>
+      <Name>FBM.Kit</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="..\FBM.Share.Background\FBM.Share.Background.projitems" Label="Shared" />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
