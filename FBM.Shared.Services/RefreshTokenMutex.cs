@@ -17,47 +17,74 @@ namespace FBM.Services
         {
             _name = REFRESH_TOKEN_MUTEX_NAME;
         }
-        public void Enter()
+        public bool Aquire()
         {
+            bool mutexAquired = false;
+            bool mutexNotExists = false;
+
             try
             {
                 _mutex = Mutex.OpenExisting(_name);
             }
+            catch (WaitHandleCannotBeOpenedException ex)
+            {
+                // mutex not exist ex
+                Debug.WriteLine(ex.ToString());
+                mutexNotExists = true;
+            }
             catch (Exception ex)
             {
+                // unexpected condition
                 Debug.WriteLine(ex.ToString());
             }
 
-            if (_mutex == null)
+            if (mutexNotExists)
             {
-                CreateMutex();
+                try
+                {
+                    CreateMutex();
+                }
+                catch ( Exception ex)
+                {
+                    // can' create mutex
+                    Debug.WriteLine(ex.ToString());
+                }
             }
-            else
+
+            if ( _mutex != null )
             {
-                _mutex.WaitOne();
+                mutexAquired = _mutex.WaitOne(0);
             }
+
+            return mutexAquired;
         }
 
-        public void Release()
+        public bool Release()
         {
             if (_mutex != null)
             {
                 _mutex.ReleaseMutex();
+            }
+
+            return true;
+        }
+
+        private bool CreateMutex()
+        {
+            bool mutexCreated = false;
+            _mutex = new Mutex(false , _name, out mutexCreated);
+
+            return mutexCreated;
+        }
+
+        public void Dispose()
+        {
+            if (_mutex != null)
+            {
                 _mutex.Dispose();
                 _mutex = null;
             }
 
-        }
-
-        private void CreateMutex()
-        {
-            bool mutexCreated = false;
-            _mutex = new Mutex(true , _name, out mutexCreated);
-
-            if (!mutexCreated)
-            {
-                throw new Exception("Can't create named  mutex");
-            }
         }
     }
 }

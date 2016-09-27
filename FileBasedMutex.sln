@@ -28,8 +28,10 @@ EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		FBM.Share.Background\FBM.Share.Background.projitems*{2b9fa061-190c-4c77-9a58-4ae5fbd10034}*SharedItemsImports = 13
+		FBM.Shared.Services\FBM.Shared.Services.projitems*{30f5f76d-7d1a-4d3f-beb3-e231d2212e98}*SharedItemsImports = 4
 		FBM.Shared\FBM.Shared.projitems*{30f5f76d-7d1a-4d3f-beb3-e231d2212e98}*SharedItemsImports = 4
 		FBM.Share.Background\FBM.Share.Background.projitems*{367ba351-04cd-4556-85b1-ad02284ac0f0}*SharedItemsImports = 4
+		FBM.Shared.Services\FBM.Shared.Services.projitems*{5a76c535-4e1f-4952-b808-08094c89630d}*SharedItemsImports = 4
 		FBM.Shared\FBM.Shared.projitems*{5a76c535-4e1f-4952-b808-08094c89630d}*SharedItemsImports = 4
 		FBM.Share.Background\FBM.Share.Background.projitems*{769720c8-4db5-4685-a8e2-e2f38cf600e3}*SharedItemsImports = 4
 		FBM.Shared.Services\FBM.Shared.Services.projitems*{769720c8-4db5-4685-a8e2-e2f38cf600e3}*SharedItemsImports = 4

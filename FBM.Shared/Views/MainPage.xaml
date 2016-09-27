@@ -7,7 +7,32 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBlock>aaaaaaaaa</TextBlock>
+    <Grid Background="LightGreen">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.5*"></RowDefinition>
+            <RowDefinition Height="0.5*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.5*" />
+                <ColumnDefinition Width="0.5*" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="AquireMutexButton"
+                    Grid.Column="0"
+                    HorizontalAlignment="Center"
+                    Click="AquireMutexButton_Click">
+                <TextBlock> Aquire mutex</TextBlock>
+            </Button>
+
+            <Button x:Name="ReleaseMutexButton"
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    Click="ReleaseMutexButton_Click">
+                <TextBlock> Release mutex</TextBlock>
+            </Button>
+
+        </Grid>
+
     </Grid>
 </Page>

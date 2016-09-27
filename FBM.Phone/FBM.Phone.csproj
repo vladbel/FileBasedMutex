@@ -80,6 +80,10 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <ProjectReference Include="..\FBM.Kit\FBM.Kit.csproj">
+      <Project>{f48cf3c7-a589-4a6e-87b4-24b75595ec82}</Project>
+      <Name>FBM.Kit</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FBM.Phone.Background\FBM.Phone.Background.csproj">
       <Project>{769720c8-4db5-4685-a8e2-e2f38cf600e3}</Project>
       <Name>FBM.Phone.Background</Name>
@@ -111,6 +115,7 @@
     </ApplicationDefinition>
   </ItemGroup>
   <Import Project="..\FBM.Shared\FBM.Shared.projitems" Label="Shared" />
+  <Import Project="..\FBM.Shared.Services\FBM.Shared.Services.projitems" Label="Shared" />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
   </PropertyGroup>

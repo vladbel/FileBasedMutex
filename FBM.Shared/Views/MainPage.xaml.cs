@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FBM.Kit.Services;
+using FBM.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,9 +24,30 @@ namespace FBM.Views
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private IMutex _mutex;
+
         public MainPage()
         {
             this.InitializeComponent();
+        }
+
+
+        private void ReleaseMutexButton_Click(object sender, RoutedEventArgs e)
+        {
+            if ( _mutex != null )
+            {
+                var mutexReleased = _mutex.Release();
+            }
+        }
+
+        private void AquireMutexButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_mutex == null)
+            {
+                _mutex = new RefreshTokenMutex();
+            }
+
+            var mutexAquired = _mutex.Aquire();
         }
     }
 }

@@ -21,7 +21,7 @@ namespace FBM.Background
             try
             {
                 Debug.WriteLine("FbmBackgroundTask.Run(): enter mutex");
-                mutex.Enter();
+                mutex.Aquire();
                 //Do work
                 Debug.WriteLine("FbmBackgroundTask.Run(): do work");
             }
