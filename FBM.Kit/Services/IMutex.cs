@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FBM.Kit.Services
 {
-    public interface IMutex: IDisposable
+    public interface IMutex
     {
         bool Aquire();
         bool Release();

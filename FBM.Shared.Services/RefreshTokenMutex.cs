@@ -10,81 +10,119 @@ namespace FBM.Services
     internal class RefreshTokenMutex : IMutex
     {
         public const string REFRESH_TOKEN_MUTEX_NAME = "REFRESH_TOKEN_MUTEX_NAME";
-        private string _name;
-        private Mutex _mutex = null;
 
-        public RefreshTokenMutex ()
-        {
-            _name = REFRESH_TOKEN_MUTEX_NAME;
-        }
-        public bool Aquire()
-        {
-            bool mutexAquired = false;
-            bool mutexNotExists = false;
 
+        private Mutex OpenExisting()
+        {
+            Mutex mutex = null;
             try
             {
-                _mutex = Mutex.OpenExisting(_name);
+                mutex = Mutex.OpenExisting(REFRESH_TOKEN_MUTEX_NAME);
             }
             catch (WaitHandleCannotBeOpenedException ex)
             {
                 // mutex not exist ex
                 Debug.WriteLine(ex.ToString());
-                mutexNotExists = true;
             }
             catch (Exception ex)
             {
                 // unexpected condition
                 Debug.WriteLine(ex.ToString());
             }
+            return mutex;
+        }
+        public bool Aquire()
+        {
 
-            if (mutexNotExists)
+            Mutex mutex = OpenExisting();
+
+            if (mutex == null)
             {
-                try
-                {
-                    CreateMutex();
-                }
-                catch ( Exception ex)
-                {
-                    // can' create mutex
-                    Debug.WriteLine(ex.ToString());
-                }
+                    mutex = CreateMutex();
             }
 
-            if ( _mutex != null )
-            {
-                mutexAquired = _mutex.WaitOne(0);
-            }
+            return Aquire(mutex);
+        }
 
+        private bool Aquire( Mutex mutex)
+        {
+            bool mutexAquired = false;
+            if (mutex != null)
+            {
+                mutexAquired = mutex.WaitOne(0);
+            }
             return mutexAquired;
         }
 
         public bool Release()
         {
-            if (_mutex != null)
-            {
-                _mutex.ReleaseMutex();
-            }
-
-            return true;
+            var mutex = OpenExisting();
+            return Release(mutex);
         }
 
-        private bool CreateMutex()
+        private bool Release(Mutex mutex)
+        {
+            var mutexReleased = false;
+
+            if (mutex != null)
+            {
+                try
+                {
+                    mutex.ReleaseMutex();
+                    mutexReleased = true;
+                }
+                catch (Exception ex)
+                {
+                    mutexReleased = false;
+                }
+            }
+            else
+            {
+                //attempt to release unexisting mutex
+                mutexReleased = false;
+            }
+
+            return mutexReleased;
+        }
+
+        private Mutex CreateMutex()
         {
             bool mutexCreated = false;
-            _mutex = new Mutex(false , _name, out mutexCreated);
+            Mutex mutex = null;
+            try
+            {
+                mutex = new Mutex(false, REFRESH_TOKEN_MUTEX_NAME, out mutexCreated);
+            }
+            catch (Exception ex)
+            {
+                // can' create mutex
+                Debug.WriteLine(ex.ToString());
+            }
 
-            return mutexCreated;
+            return mutex;
         }
 
         public void Dispose()
         {
-            if (_mutex != null)
-            {
-                _mutex.Dispose();
-                _mutex = null;
-            }
+            var mutex = OpenExisting();
 
+            if (mutex != null)
+            {
+                var aquired = Aquire(mutex);
+                var released = Release(mutex);
+                if ( aquired && released)
+                {
+                    mutex.Dispose();
+                }
+                else if (!aquired)
+                {
+                    // unable to aquire mutex
+                }
+                else
+                {
+                    // can aquire, but unable to release
+                }
+            }
         }
     }
 }
