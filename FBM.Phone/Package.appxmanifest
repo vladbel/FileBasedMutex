@@ -25,7 +25,6 @@
         <Extension Category="windows.backgroundTasks" EntryPoint="FBM.Background.FbmBackgroundTask">
           <BackgroundTasks>
             <Task Type="timer" />
-            <m2:Task Type="location" />
           </BackgroundTasks>
         </Extension>
       </Extensions>

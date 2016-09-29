@@ -4,6 +4,7 @@ using System.Diagnostics;
 using FBM.Kit.Services;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FBM.Services
 {
@@ -31,10 +32,10 @@ namespace FBM.Services
             }
             return mutex;
         }
-        public bool Aquire()
+        public bool Aquire( int milliseconds = 0)
         {
-
-            Mutex mutex = OpenExisting();
+            Mutex mutex = null;
+            mutex = OpenExisting();
 
             if (mutex == null)
             {
@@ -44,12 +45,26 @@ namespace FBM.Services
             return Aquire(mutex);
         }
 
-        private bool Aquire( Mutex mutex)
+        private bool Aquire( Mutex mutex, int milliseconds = 0)
         {
             bool mutexAquired = false;
             if (mutex != null)
             {
-                mutexAquired = mutex.WaitOne(0);
+                try
+                {
+                    mutexAquired = mutex.WaitOne(milliseconds);
+                }
+                catch (AbandonedMutexException)
+                {
+                    // we may try to recover
+                    mutex.Dispose();
+                    mutex = CreateMutex();
+                    if ( mutex != null)
+                    {
+                        mutexAquired = mutex.WaitOne(milliseconds);
+                    }
+                }
+
             }
             return mutexAquired;
         }
@@ -123,6 +138,11 @@ namespace FBM.Services
                     // can aquire, but unable to release
                 }
             }
+        }
+
+        public Task<bool> AquireAsync(int milliseconds)
+        {
+            return Task.Run(() => Aquire(milliseconds));
         }
     }
 }

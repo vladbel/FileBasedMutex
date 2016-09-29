@@ -44,7 +44,7 @@ namespace FBM.Background
                 if (mutexAquired)
                 {
                     Debug.WriteLine("FbmBackgroundTask.Run(): release mutex");
-                    mutex.Release();
+                    //mutex.Release();
                 }
 
             }

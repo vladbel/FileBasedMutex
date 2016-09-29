@@ -107,11 +107,22 @@ namespace FBM
             Window.Current.Activate();
 
             // Initialize background tasks
+            UnregisterBackgroundTasks();
+
             var trigger = new TimeTrigger(15, false);
             var task = RegisterBackgroundTask("FbmOne",
                                     typeof(FbmBackgroundTask).FullName,
                                     trigger,
                                     null);
+        }
+
+        public static void UnregisterBackgroundTasks()
+        {
+            // Unregister all tasks
+            foreach (var bgTask in BackgroundTaskRegistration.AllTasks)
+            {
+                bgTask.Value.Unregister(true);
+            }
         }
 
         private static IBackgroundTaskRegistration RegisterBackgroundTask(string name,

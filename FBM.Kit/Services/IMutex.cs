@@ -8,7 +8,8 @@ namespace FBM.Kit.Services
 {
     public interface IMutex
     {
-        bool Aquire();
+        bool Aquire( int milliseconds);
+        Task<bool> AquireAsync(int milliseconds);
         bool Release();
     }
 }
