@@ -76,10 +76,10 @@ namespace FBM.Services
             {
                 return true;
             }
-            return Release(mutex).Result;
+            return Release(mutex);
         }
 
-        private async Task<bool> Release(Mutex mutex)
+        private bool Release(Mutex mutex)
         {
             var mutexReleased = false;
 
@@ -87,8 +87,24 @@ namespace FBM.Services
             {
                 try
                 {
-                    await Task.Run ( () => mutex.ReleaseMutex());
+                    mutex.ReleaseMutex();
                     mutexReleased = true;
+                }
+                catch (Exception ex)
+                {
+                    // getting here following ex:
+                    // "object synchronization method was called from an unsynchronized block of code"
+                    Debug.WriteLine(ex.ToString());
+                    mutexReleased = false;
+                }
+
+                try
+                {
+                    if ( !mutexReleased)
+                    {
+                        mutex.Dispose();
+                        mutexReleased = true;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -131,7 +147,7 @@ namespace FBM.Services
             if (mutex != null)
             {
                 var aquired = Aquire(mutex);
-                var released = Release(mutex).Result;
+                var released = Release(mutex);
                 if ( aquired && released)
                 {
                     mutex.Dispose();
