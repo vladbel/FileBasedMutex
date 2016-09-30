@@ -31,7 +31,26 @@
                     Click="ReleaseMutexButton_Click">
                 <TextBlock> Release mutex</TextBlock>
             </Button>
+        </Grid>
 
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.5*" />
+                <ColumnDefinition Width="0.5*" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="AquireMutexButton02"
+                    Grid.Column="0"
+                    HorizontalAlignment="Center"
+                    Click="AquireMutexButton_Click">
+                <TextBlock> Aquire mutex</TextBlock>
+            </Button>
+
+            <Button x:Name="ReleaseMutexButton02"
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    Click="ReleaseMutexButton_Click">
+                <TextBlock> Release mutex</TextBlock>
+            </Button>
         </Grid>
 
     </Grid>

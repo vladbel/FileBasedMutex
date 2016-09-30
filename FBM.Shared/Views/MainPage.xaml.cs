@@ -2,9 +2,11 @@
 using FBM.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -34,12 +36,32 @@ namespace FBM.Views
         {
             var mutex = new RefreshTokenMutex();
             var mutexReleased = mutex.Release();
+
+
+            if (mutexReleased)
+            {
+                Debug.WriteLine("--------------------- Released -------------------------");
+            }
+            else
+            {
+                Debug.WriteLine("--------------------- NOT released-------------------------");
+            }
         }
 
-        private void AquireMutexButton_Click(object sender, RoutedEventArgs e)
+
+        private async void AquireMutexButton_Click(object sender, RoutedEventArgs e)
         {
             var mutex = new RefreshTokenMutex();
-            var mutexAquired = mutex.Aquire();
+            var mutexAquired = await mutex.AquireAsync(5000);
+
+            if (mutexAquired)
+            {
+                Debug.WriteLine("********************** Aquired********************************");
+            }
+            else
+            {
+                Debug.WriteLine("********************** NOT Aquired********************************");
+            }
         }
     }
 }
