@@ -57,6 +57,7 @@
                        VerticalAlignment="Center"
                        FontSize="20"
                        Foreground="Blue"
+                       TextWrapping="WrapWholeWords"
                        Text="{Binding MutexStatus}" />
         </Grid>
 

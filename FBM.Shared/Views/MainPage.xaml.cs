@@ -41,7 +41,7 @@ namespace FBM.Views
             var mutexReleased = mutex.Release();
 
 
-            if (mutexReleased)
+            if (mutexReleased == MutexOperationResult.Released)
             {
                 Debug.WriteLine("--------------------- Released -------------------------");
             }
@@ -57,7 +57,7 @@ namespace FBM.Views
             var mutex = new RefreshTokenMutex();
             var mutexAquired = await mutex.AquireAsync(5000);
 
-            if (mutexAquired)
+            if (mutexAquired == MutexOperationResult.Aquired)
             {
                 Debug.WriteLine("********************** Aquired********************************");
             }

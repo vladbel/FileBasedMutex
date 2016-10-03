@@ -13,7 +13,7 @@ namespace FBM.Services
         public const string REFRESH_TOKEN_MUTEX_NAME = "REFRESH_TOKEN_MUTEX_NAME";
 
 
-        private Mutex OpenExisting()
+        private Mutex OpenExisting( )
         {
             Mutex mutex = null;
             try
@@ -32,36 +32,71 @@ namespace FBM.Services
             }
             return mutex;
         }
-        public bool Aquire( int milliseconds = 0)
+        public MutexOperationResult Aquire( int milliseconds = 0)
         {
             Mutex mutex = null;
+            var result = MutexOperationResult.Unknown;
             mutex = OpenExisting();
 
             if (mutex == null)
             {
-                    mutex = CreateMutex();
+                mutex = CreateMutex();
+                if (mutex == null)
+                {
+                    result = MutexOperationResult.FailToCreate;
+                }
+                else
+                {
+                    result = MutexOperationResult.Created;
+                }
+            }
+            else
+            {
+                result = MutexOperationResult.Opened;
             }
 
-            return Aquire(mutex, milliseconds);
+            return result | Aquire(mutex, milliseconds);
         }
 
-        private bool Aquire( Mutex mutex, int milliseconds = 0)
+        private MutexOperationResult Aquire( Mutex mutex, int milliseconds = 0)
         {
-            bool mutexAquired = false;
+            MutexOperationResult mutexAquired = MutexOperationResult.Unknown;
             if (mutex != null)
             {
                 try
                 {
-                    mutexAquired = mutex.WaitOne(milliseconds);
+                    if ( mutex.WaitOne(milliseconds))
+                    {
+                        mutexAquired = MutexOperationResult.Aquired;
+                    }
+                    else
+                    {
+                        mutexAquired = MutexOperationResult.FailToAquire;
+                    }
                 }
                 catch (AbandonedMutexException)
                 {
                     // we may try to recover
+                    mutexAquired = MutexOperationResult.AbadonedException;
                     mutex.Dispose();
+                    mutexAquired = mutexAquired | MutexOperationResult.Disposed;
                     mutex = CreateMutex();
+                    
                     if ( mutex != null)
                     {
-                        mutexAquired = mutex.WaitOne(milliseconds);
+                        mutexAquired = mutexAquired | MutexOperationResult.Created;
+                        if (mutex.WaitOne(milliseconds))
+                            {
+                            mutexAquired = mutexAquired | MutexOperationResult.Aquired;
+                        }
+                        else
+                        {
+                            mutexAquired = mutexAquired | MutexOperationResult.FailToAquire;
+                        }
+                    }
+                    else
+                    {
+                        mutexAquired = mutexAquired | MutexOperationResult.FailToCreate;
                     }
                 }
 
@@ -69,41 +104,41 @@ namespace FBM.Services
             return mutexAquired;
         }
 
-        public bool Release()
+        public MutexOperationResult Release()
         {
             var mutex = OpenExisting();
             if(mutex == null)
             {
-                return true;
+                return MutexOperationResult.FailToOpen;
             }
             return Release(mutex);
         }
 
-        private bool Release(Mutex mutex)
+        private MutexOperationResult Release(Mutex mutex)
         {
-            var mutexReleased = false;
+            var mutexReleased = MutexOperationResult.Unknown;
 
             if (mutex != null)
             {
                 try
                 {
                     mutex.ReleaseMutex();
-                    mutexReleased = true;
+                    mutexReleased = MutexOperationResult.Released;
                 }
                 catch (Exception ex)
                 {
                     // getting here following ex:
                     // "object synchronization method was called from an unsynchronized block of code"
                     Debug.WriteLine(ex.ToString());
-                    mutexReleased = false;
+                    mutexReleased = MutexOperationResult.UnknownException;
                 }
 
                 try
                 {
-                    if ( !mutexReleased)
+                    if ( mutexReleased != MutexOperationResult.Released)
                     {
                         mutex.Dispose();
-                        mutexReleased = true;
+                        mutexReleased = MutexOperationResult.Disposed;
                     }
                 }
                 catch (Exception ex)
@@ -111,13 +146,13 @@ namespace FBM.Services
                     // getting here following ex:
                     // "object synchronization method was called from an unsynchronized block of code"
                     Debug.WriteLine(ex.ToString());
-                    mutexReleased = false;
+                    mutexReleased = MutexOperationResult.FailToDispose;
                 }
             }
             else
             {
                 //attempt to release unexisting mutex
-                mutexReleased = false;
+                mutexReleased = MutexOperationResult.FailToDispose;
             }
 
             return mutexReleased;
@@ -146,24 +181,11 @@ namespace FBM.Services
 
             if (mutex != null)
             {
-                var aquired = Aquire(mutex);
-                var released = Release(mutex);
-                if ( aquired && released)
-                {
-                    mutex.Dispose();
-                }
-                else if (!aquired)
-                {
-                    // unable to aquire mutex
-                }
-                else
-                {
-                    // can aquire, but unable to release
-                }
+                mutex.Dispose();
             }
         }
 
-        public Task<bool> AquireAsync(int milliseconds)
+        public Task<MutexOperationResult> AquireAsync(int milliseconds)
         {
             return Task.Run(() => Aquire(milliseconds));
         }

@@ -46,14 +46,7 @@ namespace FBM.Core.ViewModels
         {
             var aquired = await _mutex.AquireAsync(milliseconds);
 
-            if (aquired)
-            {
-                MutexStatus = "Aquired";
-            }
-            else
-            {
-                MutexStatus = "Not Aquired";
-            }
+            MutexStatus = aquired.ToString();
 
         }
 
@@ -62,6 +55,7 @@ namespace FBM.Core.ViewModels
         private async Task ReleaseMutexAsync()
         {
             var result = await Task.FromResult(_mutex.Release());
+            MutexStatus = result.ToString();
         }
 
     }

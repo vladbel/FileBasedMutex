@@ -17,22 +17,16 @@ namespace FBM.Background
             Debug.WriteLine("FbmBackgroundTask.Run(): Start");
 
             IMutex mutex = new RefreshTokenMutex();
-            bool mutexAquired = false;
+            MutexOperationResult mutexAquired = MutexOperationResult.Unknown;
 
             try
             {
                 Debug.WriteLine("FbmBackgroundTask.Run(): enter mutex");
                 mutexAquired = mutex.Aquire();
-                if ( mutexAquired)
-                {
-                    //Do work
-                    Debug.WriteLine("FbmBackgroundTask.Run(): do work");
-                }
-                else
-                {
-                    //unable aquire mutex
-                    Debug.WriteLine("FbmBackgroundTask.Run(): unable aquire mutex");
-                }
+                Debug.WriteLine("FbmBackgroundTask.Run():" + mutexAquired.ToString());
+
+                // Do work here
+
 
             }
             catch (Exception ex)
@@ -41,10 +35,10 @@ namespace FBM.Background
             }
             finally
             {
-                if (mutexAquired)
+                if (mutexAquired == MutexOperationResult.Aquired)
                 {
-                    Debug.WriteLine("FbmBackgroundTask.Run(): release mutex");
-                    //mutex.Release();
+                    Debug.WriteLine("FbmBackgroundTask.Run(): " + mutex.Release().ToString());
+                    
                 }
 
             }
