@@ -37,20 +37,27 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="0.5*" />
                 <ColumnDefinition Width="0.5*" />
+                <ColumnDefinition Width="0.5*" />
             </Grid.ColumnDefinitions>
             <Button x:Name="AquireMutexButton02"
                     Grid.Column="0"
                     HorizontalAlignment="Center"
-                    Click="AquireMutexButton_Click">
+                    Command="{Binding AquireMutex}">
                 <TextBlock> Aquire mutex</TextBlock>
             </Button>
 
             <Button x:Name="ReleaseMutexButton02"
                     Grid.Column="1"
                     HorizontalAlignment="Center"
-                    Click="ReleaseMutexButton_Click">
+                    Command="{Binding ReleaseMutex}">
                 <TextBlock> Release mutex</TextBlock>
             </Button>
+            <TextBlock Grid.Column="2"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="20"
+                       Foreground="Blue"
+                       Text="{Binding MutexStatus}" />
         </Grid>
 
     </Grid>

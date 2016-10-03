@@ -80,6 +80,10 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <ProjectReference Include="..\FBM.Core\FBM.Core.csproj">
+      <Project>{190d06a7-3e22-4d77-b720-b790b72775a7}</Project>
+      <Name>FBM.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FBM.Kit\FBM.Kit.csproj">
       <Project>{f48cf3c7-a589-4a6e-87b4-24b75595ec82}</Project>
       <Name>FBM.Kit</Name>

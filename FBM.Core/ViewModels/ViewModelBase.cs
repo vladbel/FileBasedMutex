@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FBM.Core.ViewModels
 {
-    public abstract class BaseViewModel : INotifyPropertyChanged
+    public abstract class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

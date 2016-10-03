@@ -1,4 +1,5 @@
-﻿using FBM.Kit.Services;
+﻿using FBM.Core.ViewModels;
+using FBM.Kit.Services;
 using FBM.Services;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,8 @@ namespace FBM.Views
         public MainPage()
         {
             this.InitializeComponent();
+
+            this.DataContext = new MutexViewModel(new RefreshTokenMutex());
         }
 
 
