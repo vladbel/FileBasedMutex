@@ -25,10 +25,10 @@ namespace FBM.Core.ViewModels
                 await ReleaseMutexAsync();
             });
 
-            DoWork = new RelayCommand( async() =>
-            {
-                await DoWorkAsync();
-            });
+            DoWork = new RelayCommand(async () =>
+           {
+               await DoWorkAsync();
+           });
         }
 
 
@@ -63,7 +63,7 @@ namespace FBM.Core.ViewModels
         private string _mutexStatus = "Unknown";
         public string MutexStatus
         {
-            get 
+            get
             {
                 return _mutexStatus;
             }
@@ -75,22 +75,27 @@ namespace FBM.Core.ViewModels
         }
 
         public ICommand DoWork { get; set; }
-        
-        private async Task DoWorkAsync ()
+
+        private async Task DoWorkAsync()
         {
             MutexStatus = "";
-            var aquiredResult = _mutex.Aquire(_msec);
+            MutexOperationResult aquiredResult = MutexOperationResult.NoValue;
+            MutexOperationResult releaseResult = MutexOperationResult.NoValue;
 
-            if ( (aquiredResult = MutexOperationResult.Aquired) != MutexOperationResult.NoValue)
-            {
-                  for (var i = 1; i < 6; i++)
-                  {
-                      await Task.Delay(_msec);
-                      MutexStatus = "Running " + (i * _msec).ToString();
-                  }
-            }
+            await Task.Run(async () =>
+                     {
+                         aquiredResult = _mutex.Aquire(_msec);
 
-            var releaseResult = _mutex.Release();
+                         if ((aquiredResult = MutexOperationResult.Aquired) != MutexOperationResult.NoValue)
+                         {
+                             for (var i = 1; i < 6; i++)
+                             {
+                                 await Task.Delay(_msec);
+                             }
+                             releaseResult = _mutex.Release();
+                         }
+
+                     });
 
             MutexStatus = (aquiredResult | releaseResult).ToString();
 
@@ -100,7 +105,7 @@ namespace FBM.Core.ViewModels
         public ICommand AquireMutex { get; set; }
         private async Task AquireMutexAsync()
         {
-            var aquired = _mutex.Aquire(_msec);
+            var aquired = await Task.Run( () => { return _mutex.Aquire(_msec); });
             MutexStatus = aquired.ToString();
             await Task.FromResult(false);
         }
@@ -109,7 +114,7 @@ namespace FBM.Core.ViewModels
 
         private async Task ReleaseMutexAsync()
         {
-            var result = await Task.FromResult(_mutex.Release( _forceDispose));
+            var result = await Task.Run( () => { return _mutex.Release(_forceDispose); });
             MutexStatus = result.ToString();
         }
 
