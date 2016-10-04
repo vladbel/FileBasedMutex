@@ -9,7 +9,7 @@ namespace FBM.Kit.Services
     [Flags]
     public enum  MutexOperationResult
     {
-        Unknown = 0,
+        NoValue = 0,
         Opened = 1,
         Created = 2,
         Aquired = 4,
@@ -20,12 +20,13 @@ namespace FBM.Kit.Services
         FailToCreate = 128,
         FailToAquire = 256,
         FailToOpen = 512,
-        FailToDispose = 1024
+        FailToDispose = 1024,
+        SynchronizationException = 2048
     }
     public interface IMutex
     {
         MutexOperationResult Aquire( int milliseconds = 0);
-        Task<MutexOperationResult> AquireAsync(int milliseconds);
-        MutexOperationResult Release();
+        Task<MutexOperationResult> AquireAsync(int milliseconds = 0);
+        MutexOperationResult Release(bool forceDisposeIfNotReleased = false);
     }
 }

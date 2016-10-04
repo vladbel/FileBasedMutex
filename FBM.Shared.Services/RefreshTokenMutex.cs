@@ -10,7 +10,8 @@ namespace FBM.Services
 {
     internal class RefreshTokenMutex : IMutex
     {
-        public const string REFRESH_TOKEN_MUTEX_NAME = "REFRESH_TOKEN_MUTEX_NAME";
+        private const string REFRESH_TOKEN_MUTEX_NAME = "REFRESH_TOKEN_MUTEX_NAME";
+        private const int SYNCHRONIZATION_EX_HRESULT = -2146233088;
 
 
         private Mutex OpenExisting( )
@@ -35,7 +36,7 @@ namespace FBM.Services
         public MutexOperationResult Aquire( int milliseconds = 0)
         {
             Mutex mutex = null;
-            var result = MutexOperationResult.Unknown;
+            var result = MutexOperationResult.NoValue;
             mutex = OpenExisting();
 
             if (mutex == null)
@@ -60,7 +61,7 @@ namespace FBM.Services
 
         private MutexOperationResult Aquire( Mutex mutex, int milliseconds = 0)
         {
-            MutexOperationResult mutexAquired = MutexOperationResult.Unknown;
+            MutexOperationResult mutexAquired = MutexOperationResult.NoValue;
             if (mutex != null)
             {
                 try
@@ -104,19 +105,19 @@ namespace FBM.Services
             return mutexAquired;
         }
 
-        public MutexOperationResult Release()
+        public MutexOperationResult Release(bool forceDisposeIfNotReleased = false)
         {
             var mutex = OpenExisting();
             if(mutex == null)
             {
                 return MutexOperationResult.FailToOpen;
             }
-            return Release(mutex);
+            return Release(mutex, forceDisposeIfNotReleased);
         }
 
-        private MutexOperationResult Release(Mutex mutex)
+        private MutexOperationResult Release(Mutex mutex, bool forceDisposeIfNotReleased = false)
         {
-            var mutexReleased = MutexOperationResult.Unknown;
+            var mutexReleased = MutexOperationResult.NoValue;
 
             if (mutex != null)
             {
@@ -129,13 +130,21 @@ namespace FBM.Services
                 {
                     // getting here following ex:
                     // "object synchronization method was called from an unsynchronized block of code"
-                    Debug.WriteLine(ex.ToString());
-                    mutexReleased = MutexOperationResult.UnknownException;
+                    if ( ex.HResult == SYNCHRONIZATION_EX_HRESULT)
+                    {
+                        mutexReleased = MutexOperationResult.SynchronizationException;
+                    }
+                    else
+                    {
+                        mutexReleased = MutexOperationResult.UnknownException;
+                    }
+                    
                 }
 
                 try
                 {
-                    if ( mutexReleased != MutexOperationResult.Released)
+                    if ( mutexReleased != MutexOperationResult.Released 
+                        && forceDisposeIfNotReleased)
                     {
                         mutex.Dispose();
                         mutexReleased = MutexOperationResult.Disposed;
@@ -143,8 +152,6 @@ namespace FBM.Services
                 }
                 catch (Exception ex)
                 {
-                    // getting here following ex:
-                    // "object synchronization method was called from an unsynchronized block of code"
                     Debug.WriteLine(ex.ToString());
                     mutexReleased = MutexOperationResult.FailToDispose;
                 }

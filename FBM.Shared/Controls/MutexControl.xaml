@@ -8,31 +8,62 @@
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
-    
-    <Grid Margin="20,20,20,20"
+
+    <Grid Margin="10,10,10,10"
           Background="LightSteelBlue">
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.4*" />
-            <RowDefinition Height="0.6*" />
+            <RowDefinition Height="0.33*" />
+            <RowDefinition Height="0.33*" />
+            <RowDefinition Height="0.33*" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="0.5*" />
                 <ColumnDefinition Width="0.5*" />
             </Grid.ColumnDefinitions>
+            <CheckBox Grid.Column="0"
+                      Width="Auto"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      FontSize="12"
+                      IsChecked="{Binding ForceDispose, Mode=TwoWay}" >
+                <TextBlock FontSize="12">
+                    Force Dispose
+                </TextBlock>
+            </CheckBox>
+            <TextBox Grid.Column="1"
+                     Text="{Binding Milliseconds, Mode=TwoWay}"
+                     VerticalAlignment="Center">
+                
+            </TextBox>
+        </Grid>
+        
+        
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.33*" />
+                <ColumnDefinition Width="0.33*" />
+                <ColumnDefinition Width="0.33*" />
+            </Grid.ColumnDefinitions>
             <Button Grid.Column="0"
                     HorizontalAlignment="Center"
                     Command="{Binding AquireMutex}">
-                <TextBlock> Aquire mutex</TextBlock>
+                <TextBlock TextWrapping="WrapWholeWords" FontSize="12"> Aquire mutex</TextBlock>
             </Button>
 
             <Button Grid.Column="1"
                     HorizontalAlignment="Center"
                     Command="{Binding ReleaseMutex}">
-                <TextBlock> Release mutex</TextBlock>
+                <TextBlock TextWrapping="WrapWholeWords" FontSize="12"> Release mutex</TextBlock>
+            </Button>
+
+            <Button Grid.Column="2"
+                    HorizontalAlignment="Center"
+                    Command="{Binding DoWork}">
+                <TextBlock TextWrapping="WrapWholeWords" FontSize="12"> Do Work ( A + R)</TextBlock>
             </Button>
         </Grid>
-        <TextBlock Grid.Row="1"
+        <TextBlock Grid.Row="2"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        FontSize="20"

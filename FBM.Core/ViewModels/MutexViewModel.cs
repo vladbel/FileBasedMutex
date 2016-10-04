@@ -24,9 +24,41 @@ namespace FBM.Core.ViewModels
             {
                 await ReleaseMutexAsync();
             });
+
+            DoWork = new RelayCommand( async() =>
+            {
+                await DoWorkAsync();
+            });
         }
 
-        public ICommand AquireMutex { get; set; }
+
+        private int _msec = 1000;
+        public int Milliseconds
+        {
+            get
+            {
+                return _msec;
+            }
+            set
+            {
+                _msec = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _forceDispose = false;
+        public bool ForceDispose
+        {
+            get
+            {
+                return _forceDispose;
+            }
+            set
+            {
+                _forceDispose = value;
+                OnPropertyChanged();
+            }
+        }
 
         private string _mutexStatus = "Unknown";
         public string MutexStatus
@@ -42,19 +74,42 @@ namespace FBM.Core.ViewModels
             }
         }
 
-        private async Task AquireMutexAsync(int milliseconds = 0)
+        public ICommand DoWork { get; set; }
+        
+        private async Task DoWorkAsync ()
         {
-            var aquired = await _mutex.AquireAsync(milliseconds);
+            MutexStatus = "";
+            var aquiredResult = _mutex.Aquire(_msec);
 
+            if ( (aquiredResult = MutexOperationResult.Aquired) != MutexOperationResult.NoValue)
+            {
+                  for (var i = 1; i < 6; i++)
+                  {
+                      await Task.Delay(_msec);
+                      MutexStatus = "Running " + (i * _msec).ToString();
+                  }
+            }
+
+            var releaseResult = _mutex.Release();
+
+            MutexStatus = (aquiredResult | releaseResult).ToString();
+
+        }
+
+
+        public ICommand AquireMutex { get; set; }
+        private async Task AquireMutexAsync()
+        {
+            var aquired = _mutex.Aquire(_msec);
             MutexStatus = aquired.ToString();
-
+            await Task.FromResult(false);
         }
 
         public ICommand ReleaseMutex { get; set; }
 
         private async Task ReleaseMutexAsync()
         {
-            var result = await Task.FromResult(_mutex.Release());
+            var result = await Task.FromResult(_mutex.Release( _forceDispose));
             MutexStatus = result.ToString();
         }
 
