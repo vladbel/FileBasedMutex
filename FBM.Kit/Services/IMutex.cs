@@ -26,7 +26,6 @@ namespace FBM.Kit.Services
     public interface IMutex
     {
         MutexOperationResult Aquire( int milliseconds = 0);
-        Task<MutexOperationResult> AquireAsync(int milliseconds = 0);
         MutexOperationResult Release(bool forceDisposeIfNotReleased = false);
     }
 }

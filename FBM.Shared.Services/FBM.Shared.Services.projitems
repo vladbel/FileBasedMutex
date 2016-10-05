@@ -9,6 +9,7 @@
     <Import_RootNamespace>FBM.Services</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)FileMutex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RefreshTokenMutex.cs" />
   </ItemGroup>
 </Project>

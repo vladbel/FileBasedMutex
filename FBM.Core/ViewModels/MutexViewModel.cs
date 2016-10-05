@@ -1,10 +1,12 @@
 ﻿using FBM.Kit.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+
 
 namespace FBM.Core.ViewModels
 {
@@ -86,11 +88,12 @@ namespace FBM.Core.ViewModels
                      {
                          aquiredResult = _mutex.Aquire(_msec);
 
-                         if ((aquiredResult = MutexOperationResult.Aquired) != MutexOperationResult.NoValue)
+                         if ((aquiredResult & MutexOperationResult.Aquired) != MutexOperationResult.NoValue)
                          {
                              for (var i = 1; i < 6; i++)
                              {
                                  await Task.Delay(_msec);
+                                 Debug.WriteLine("Running: " + (i * Milliseconds).ToString());
                              }
                              releaseResult = _mutex.Release();
                          }
@@ -105,7 +108,11 @@ namespace FBM.Core.ViewModels
         public ICommand AquireMutex { get; set; }
         private async Task AquireMutexAsync()
         {
-            var aquired = await Task.Run( () => { return _mutex.Aquire(_msec); });
+            var aquired = await Task.Run( () => 
+                {
+                    Debug.WriteLine("-----------------------ThreadId = " + Environment.CurrentManagedThreadId);
+                    return _mutex.Aquire(_msec);
+                });
             MutexStatus = aquired.ToString();
             await Task.FromResult(false);
         }
@@ -114,7 +121,10 @@ namespace FBM.Core.ViewModels
 
         private async Task ReleaseMutexAsync()
         {
-            var result = await Task.Run( () => { return _mutex.Release(_forceDispose); });
+            var result = await Task.Run( () => 
+                    {
+                        return _mutex.Release(_forceDispose);
+                    });
             MutexStatus = result.ToString();
         }
 
