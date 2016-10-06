@@ -32,6 +32,7 @@ namespace FBM.Background
                     // Do work here
                     for (var i = 0; i < 5; i++)
                     {
+                        Task.Delay(1000);
                         Debug.WriteLine("--------------------FbmBackgroundTask.Run():" + "doing some work");
                     }
                 }

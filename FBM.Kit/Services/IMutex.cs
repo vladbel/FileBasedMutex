@@ -29,10 +29,41 @@ namespace FBM.Kit.Services
         public MutexOperationResult()
         {
             Result = MutexOperationResultEnum.NoValue;
+            _history = new List<string>();
         }
-        public MutexOperationResultEnum Result { get; set; }
+
+        private List<String> _history;
+        MutexOperationResultEnum _result;
+        public MutexOperationResultEnum Result
+        {
+            get
+            {
+                return _result;
+            }
+            set
+            {
+                if ( _history == null)
+                {
+                    _history = new List<string>();
+                }
+
+                _history.Add(((_result ^ value) & value).ToString());
+                _result = value;
+            }
+        }
+
+        public void Combine ( MutexOperationResult anotherResult)
+        {
+            _history.AddRange(anotherResult._history);
+            _result = _result | anotherResult._result;
+        }
+
         public override string ToString()
         {
+            if (_history?.Count > 0)
+            {
+                return _history.Aggregate((i, j) => i.ToString() + "-" + j.ToString());
+            }
             return Result.ToString();
         }
     }

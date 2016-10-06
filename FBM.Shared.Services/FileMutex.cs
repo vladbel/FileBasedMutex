@@ -43,8 +43,17 @@ namespace FBM.Services
                 await FileIO.WriteTextAsync(file, "aquired");
                 result.Result =  MutexOperationResultEnum.Aquired;
             }
-            else
+            else if (msec > 1)
             {
+                for ( var i = 0; i < 5; i++ )
+                {
+                    await Task.Delay(msec / 5);
+                    result = await AquireAsync();
+                    if ((result.Result & MutexOperationResultEnum.Aquired) == MutexOperationResultEnum.Aquired)
+                    {
+                        return result;
+                    }
+                }
                 result.Result = MutexOperationResultEnum.FailToAquire;
             }
             return result;

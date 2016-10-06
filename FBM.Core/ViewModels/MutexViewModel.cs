@@ -116,7 +116,6 @@ namespace FBM.Core.ViewModels
                     return _mutex.Aquire(_msec);
                 });
             MutexStatus = aquired.ToString();
-            await Task.FromResult(false);
         }
 
         public ICommand ReleaseMutex { get; set; }
