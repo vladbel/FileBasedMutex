@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace FBM.Kit.Services
 {
     [Flags]
-    public enum  MutexOperationResult
+    public enum  MutexOperationResultEnum
     {
         NoValue = 0,
         Opened = 1,
@@ -22,6 +22,19 @@ namespace FBM.Kit.Services
         FailToOpen = 512,
         FailToDispose = 1024,
         SynchronizationException = 2048
+    }
+
+    public class MutexOperationResult
+    {
+        public MutexOperationResult()
+        {
+            Result = MutexOperationResultEnum.NoValue;
+        }
+        public MutexOperationResultEnum Result { get; set; }
+        public override string ToString()
+        {
+            return Result.ToString();
+        }
     }
     public interface IMutex
     {

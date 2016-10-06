@@ -36,7 +36,7 @@ namespace FBM.Services
         public MutexOperationResult Aquire( int milliseconds = 0)
         {
             Mutex mutex = null;
-            var result = MutexOperationResult.NoValue;
+            var result = new MutexOperationResult();
             mutex = OpenExisting();
 
             if (mutex == null)
@@ -44,60 +44,61 @@ namespace FBM.Services
                 mutex = CreateMutex();
                 if (mutex == null)
                 {
-                    result = MutexOperationResult.FailToCreate;
+                    result.Result = MutexOperationResultEnum.FailToCreate;
                 }
                 else
                 {
-                    result = MutexOperationResult.Created;
+                    result.Result = MutexOperationResultEnum.Created;
                 }
             }
             else
             {
-                result = MutexOperationResult.Opened;
+                result.Result = MutexOperationResultEnum.Opened;
             }
 
-            return result | Aquire(mutex, milliseconds);
+             result.Result = result.Result | Aquire(mutex, milliseconds).Result;
+            return result;
         }
 
         private MutexOperationResult Aquire( Mutex mutex, int milliseconds = 0)
         {
-            MutexOperationResult mutexAquired = MutexOperationResult.NoValue;
+            MutexOperationResult mutexAquired = new MutexOperationResult();
             if (mutex != null)
             {
                 try
                 {
                     if ( mutex.WaitOne(milliseconds))
                     {
-                        mutexAquired = MutexOperationResult.Aquired;
+                        mutexAquired.Result = MutexOperationResultEnum.Aquired;
                     }
                     else
                     {
-                        mutexAquired = MutexOperationResult.FailToAquire;
+                        mutexAquired.Result = MutexOperationResultEnum.FailToAquire;
                     }
                 }
                 catch (AbandonedMutexException)
                 {
                     // we may try to recover
-                    mutexAquired = MutexOperationResult.AbadonedException;
+                    mutexAquired.Result = MutexOperationResultEnum.AbadonedException;
                     mutex.Dispose();
-                    mutexAquired = mutexAquired | MutexOperationResult.Disposed;
+                    mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.Disposed;
                     mutex = CreateMutex();
                     
                     if ( mutex != null)
                     {
-                        mutexAquired = mutexAquired | MutexOperationResult.Created;
+                        mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.Created;
                         if (mutex.WaitOne(milliseconds))
                             {
-                            mutexAquired = mutexAquired | MutexOperationResult.Aquired;
+                            mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.Aquired;
                         }
                         else
                         {
-                            mutexAquired = mutexAquired | MutexOperationResult.FailToAquire;
+                            mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.FailToAquire;
                         }
                     }
                     else
                     {
-                        mutexAquired = mutexAquired | MutexOperationResult.FailToCreate;
+                        mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.FailToCreate;
                     }
                 }
 
@@ -110,21 +111,23 @@ namespace FBM.Services
             var mutex = OpenExisting();
             if(mutex == null)
             {
-                return MutexOperationResult.FailToOpen;
+                var result = new MutexOperationResult();
+                    result.Result = MutexOperationResultEnum.FailToOpen;
+                return result;
             }
             return Release(mutex, forceDisposeIfNotReleased);
         }
 
         private MutexOperationResult Release(Mutex mutex, bool forceDisposeIfNotReleased = false)
         {
-            var mutexReleased = MutexOperationResult.NoValue;
+            var mutexReleased = new MutexOperationResult();
 
             if (mutex != null)
             {
                 try
                 {
                     mutex.ReleaseMutex();
-                    mutexReleased = MutexOperationResult.Released;
+                    mutexReleased.Result = MutexOperationResultEnum.Released;
                 }
                 catch (Exception ex)
                 {
@@ -132,34 +135,34 @@ namespace FBM.Services
                     // "object synchronization method was called from an unsynchronized block of code"
                     if ( ex.HResult == SYNCHRONIZATION_EX_HRESULT)
                     {
-                        mutexReleased = MutexOperationResult.SynchronizationException;
+                        mutexReleased.Result = MutexOperationResultEnum.SynchronizationException;
                     }
                     else
                     {
-                        mutexReleased = MutexOperationResult.UnknownException;
+                        mutexReleased.Result = MutexOperationResultEnum.UnknownException;
                     }
                     
                 }
 
                 try
                 {
-                    if ( mutexReleased != MutexOperationResult.Released 
+                    if ( mutexReleased.Result != MutexOperationResultEnum.Released 
                         && forceDisposeIfNotReleased)
                     {
                         mutex.Dispose();
-                        mutexReleased = MutexOperationResult.Disposed;
+                        mutexReleased.Result = MutexOperationResultEnum.Disposed;
                     }
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine(ex.ToString());
-                    mutexReleased = MutexOperationResult.FailToDispose;
+                    mutexReleased.Result = MutexOperationResultEnum.FailToDispose;
                 }
             }
             else
             {
                 //attempt to release unexisting mutex
-                mutexReleased = MutexOperationResult.FailToDispose;
+                mutexReleased.Result = MutexOperationResultEnum.FailToDispose;
             }
 
             return mutexReleased;

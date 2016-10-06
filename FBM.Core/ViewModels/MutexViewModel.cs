@@ -81,14 +81,15 @@ namespace FBM.Core.ViewModels
         private async Task DoWorkAsync()
         {
             MutexStatus = "";
-            MutexOperationResult aquiredResult = MutexOperationResult.NoValue;
-            MutexOperationResult releaseResult = MutexOperationResult.NoValue;
+            MutexOperationResult aquiredResult;
+            MutexOperationResult releaseResult;
+            var result = "Started";
 
             await Task.Run(async () =>
                      {
                          aquiredResult = _mutex.Aquire(_msec);
 
-                         if ((aquiredResult & MutexOperationResult.Aquired) != MutexOperationResult.NoValue)
+                         if ((aquiredResult.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue)
                          {
                              for (var i = 1; i < 6; i++)
                              {
@@ -96,11 +97,12 @@ namespace FBM.Core.ViewModels
                                  Debug.WriteLine("Running: " + (i * Milliseconds).ToString());
                              }
                              releaseResult = _mutex.Release();
+                             result = (aquiredResult.Result | releaseResult.Result).ToString();
                          }
 
                      });
 
-            MutexStatus = (aquiredResult | releaseResult).ToString();
+            MutexStatus = result;
 
         }
 

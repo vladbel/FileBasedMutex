@@ -16,9 +16,10 @@ namespace FBM.Background
         {
             Debug.WriteLine("--------------------FbmBackgroundTask.Run(): Start");
 
-            IMutex mutex = new RefreshTokenMutex();
-            MutexOperationResult mutexAquired = MutexOperationResult.NoValue;
-            MutexOperationResult mutexReleased = MutexOperationResult.NoValue;
+            //IMutex mutex = new RefreshTokenMutex();
+            IMutex mutex = new FileMutex();
+            MutexOperationResult mutexAquired = null;
+            MutexOperationResult mutexReleased = null;
 
             try
             {
@@ -26,7 +27,7 @@ namespace FBM.Background
                 mutexAquired = mutex.Aquire(5000);
                 Debug.WriteLine("--------------------FbmBackgroundTask.Run():" + mutexAquired.ToString());
 
-                if ( (mutexAquired & MutexOperationResult.Aquired) != MutexOperationResult.NoValue )
+                if ( (mutexAquired.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue )
                 {
                     // Do work here
                     for (var i = 0; i < 5; i++)
@@ -42,13 +43,13 @@ namespace FBM.Background
             }
             finally
             {
-                if ( (mutexAquired & MutexOperationResult.Aquired) != MutexOperationResult.NoValue)
+                if (mutexAquired != null && (mutexAquired.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue)
                 {
                     mutexReleased = mutex.Release();
                     Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + mutexReleased.ToString());
                 }
 
-                if ( MutexOperationResult.NoValue == ( mutexReleased & MutexOperationResult.Released))
+                if ( mutexReleased == null || ( mutexReleased.Result & MutexOperationResultEnum.Released) == MutexOperationResultEnum.NoValue)
                 {
                     mutexReleased = mutex.Release(forceDisposeIfNotReleased: true);
                     Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + "forceDispose: " + mutexReleased.ToString());

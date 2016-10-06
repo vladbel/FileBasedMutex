@@ -24,7 +24,8 @@ namespace FBM.Controls
         public MutexControl()
         {
             this.InitializeComponent();
-            this.DataContext = new MutexViewModel(new RefreshTokenMutex());
+            //this.DataContext = new MutexViewModel(new RefreshTokenMutex());
+            this.DataContext = new MutexViewModel(new FileMutex());
         }
     }
 }
