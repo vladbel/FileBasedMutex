@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace FBM.Services
 {
-    internal class FileMutex : IMutexService
+    internal class FileMutexService : IMutexService
     {
         private const string FILE = "mutex.txt";
 
