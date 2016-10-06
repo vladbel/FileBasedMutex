@@ -17,7 +17,7 @@ namespace FBM.Background
             Debug.WriteLine("--------------------FbmBackgroundTask.Run(): Start");
 
             //IMutex mutex = new RefreshTokenMutex();
-            IMutex mutex = new FileMutex();
+            IMutexService mutex = new FileMutex();
             MutexOperationResult mutexAquired = null;
             MutexOperationResult mutexReleased = null;
 

@@ -67,7 +67,7 @@ namespace FBM.Kit.Services
             return Result.ToString();
         }
     }
-    public interface IMutex
+    public interface IMutexService
     {
         MutexOperationResult Aquire( int milliseconds = 0);
         MutexOperationResult Release(bool forceDisposeIfNotReleased = false);

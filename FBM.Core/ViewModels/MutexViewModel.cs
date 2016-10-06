@@ -12,8 +12,8 @@ namespace FBM.Core.ViewModels
 {
     public class MutexViewModel : ViewModels.ViewModelBase
     {
-        private IMutex _mutex;
-        public MutexViewModel(IMutex mutex)
+        private IMutexService _mutex;
+        public MutexViewModel(IMutexService mutex)
         {
             _mutex = mutex;
 

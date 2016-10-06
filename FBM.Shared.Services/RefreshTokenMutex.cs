@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FBM.Services
 {
-    internal class RefreshTokenMutex : IMutex
+    internal class RefreshTokenMutex : IMutexService
     {
         private const string REFRESH_TOKEN_MUTEX_NAME = "REFRESH_TOKEN_MUTEX_NAME";
         private const int SYNCHRONIZATION_EX_HRESULT = -2146233088;
