@@ -17,14 +17,14 @@ namespace FBM.Background
             Debug.WriteLine("--------------------FbmBackgroundTask.Run(): Start");
 
             //IMutex mutex = new RefreshTokenMutex();
-            IMutexService mutex = new FileMutexService();
+            IMutexService mutex = new MutexService();
             MutexOperationResult mutexAquired = null;
             MutexOperationResult mutexReleased = null;
 
             try
             {
                 Debug.WriteLine("--------------------FbmBackgroundTask.Run(): enter mutex");
-                mutexAquired = mutex.Aquire(5000);
+                mutexAquired =  mutex.Aquire(5000).Result;
                 Debug.WriteLine("--------------------FbmBackgroundTask.Run():" + mutexAquired.ToString());
 
                 if ( (mutexAquired.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue )
@@ -46,16 +46,15 @@ namespace FBM.Background
             {
                 if (mutexAquired != null && (mutexAquired.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue)
                 {
-                    mutexReleased = mutex.Release();
+                    mutexReleased = mutex.Release(mutexAquired.AcquisitionKey).Result;
                     Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + mutexReleased.ToString());
-                }
 
-                if ( mutexReleased == null || ( mutexReleased.Result & MutexOperationResultEnum.Released) == MutexOperationResultEnum.NoValue)
-                {
-                    mutexReleased = mutex.Release(forceDisposeIfNotReleased: true);
-                    Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + "forceDispose: " + mutexReleased.ToString());
+                    if (mutexReleased == null || (mutexReleased.Result & MutexOperationResultEnum.Released) == MutexOperationResultEnum.NoValue)
+                    {
+                        mutexReleased = mutex.Dispose().Result;
+                        Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + "Dispose: " + mutexReleased.ToString());
+                    }
                 }
-
             }
         }
     }

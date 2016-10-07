@@ -87,7 +87,7 @@ namespace FBM.Core.ViewModels
 
             await Task.Run(async () =>
                      {
-                         aquiredResult = _mutex.Aquire(_msec);
+                         aquiredResult = await _mutex.Aquire(_msec);
 
                          if ((aquiredResult.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue)
                          {
@@ -96,7 +96,7 @@ namespace FBM.Core.ViewModels
                                  await Task.Delay(_msec);
                                  Debug.WriteLine("Running: " + (i * Milliseconds).ToString());
                              }
-                             releaseResult = _mutex.Release();
+                             releaseResult = await _mutex.Release(aquiredResult.AcquisitionKey);
                              result = (aquiredResult.Result | releaseResult.Result).ToString();
                          }
 
@@ -107,25 +107,40 @@ namespace FBM.Core.ViewModels
         }
 
 
+        private MutexOperationResult  _acquisitionResult;
+
         public ICommand AquireMutex { get; set; }
         private async Task AquireMutexAsync()
         {
-            var aquired = await Task.Run( () => 
+            _acquisitionResult = await Task.Run( () => 
                 {
                     Debug.WriteLine("-----------------------ThreadId = " + Environment.CurrentManagedThreadId);
                     return _mutex.Aquire(_msec);
                 });
-            MutexStatus = aquired.ToString();
+            MutexStatus = _acquisitionResult.ToString();
         }
 
         public ICommand ReleaseMutex { get; set; }
 
         private async Task ReleaseMutexAsync()
         {
+            if (ForceDispose)
+            {
+                var disposed = await _mutex.Dispose();
+                MutexStatus = disposed.ToString();
+                return;
+            }
+
+            if (_acquisitionResult == null)
+            {
+                MutexStatus = "Mutex not aquired yet";
+                return;
+            }
             var result = await Task.Run( () => 
                     {
-                        return _mutex.Release(_forceDispose);
+                        return _mutex.Release(_acquisitionResult.AcquisitionKey);
                     });
+
             MutexStatus = result.ToString();
         }
 

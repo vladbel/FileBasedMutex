@@ -19,7 +19,7 @@ namespace FBM.Kit.Services
         UnknownException = 64,
         FailToCreate = 128,
         FailToAquire = 256,
-        FailToOpen = 512,
+        FailToRelease = 512,
         FailToDispose = 1024,
         SynchronizationException = 2048
     }
@@ -52,6 +52,8 @@ namespace FBM.Kit.Services
             }
         }
 
+        public string AcquisitionKey { get; set; }
+
         public void Combine ( MutexOperationResult anotherResult)
         {
             _history.AddRange(anotherResult._history);
@@ -69,7 +71,8 @@ namespace FBM.Kit.Services
     }
     public interface IMutexService
     {
-        MutexOperationResult Aquire( int milliseconds = 0);
-        MutexOperationResult Release(bool forceDisposeIfNotReleased = false);
+        Task<MutexOperationResult> Aquire( int milliseconds = 0);
+        Task<MutexOperationResult> Release(string key);
+        Task<MutexOperationResult> Dispose();
     }
 }
