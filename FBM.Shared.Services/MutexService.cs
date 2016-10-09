@@ -5,12 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using System.Linq;
+using System.Threading;
+using System.Diagnostics;
 
 namespace FBM.Services
 {
     internal class MutexService : IMutexService
     {
         private const string FILE = "mutex.txt";
+
+        private Task _deferredRelease;
+        private CancellationTokenSource _cancellationSource;
 
         private StorageFolder Folder
         {
@@ -53,6 +58,33 @@ namespace FBM.Services
                 }
                 result.Result = MutexOperationResultEnum.FailToAquire;
             }
+
+            if ((result.Result & MutexOperationResultEnum.Aquired) == MutexOperationResultEnum.Aquired)
+            {
+                _cancellationSource = new CancellationTokenSource();
+                var deferredReleaseCancellationToken = _cancellationSource.Token;
+                _deferredRelease = Task.Run(
+                    async () =>
+                    {
+                        for (var i = 0; i < 10; i++)
+                        {
+                            await Task.Delay(1000);
+                            if (deferredReleaseCancellationToken.IsCancellationRequested)
+                            {
+                                Debug.WriteLine("-------Deferred release: cancel");
+                                deferredReleaseCancellationToken.ThrowIfCancellationRequested();
+                            }
+                            else
+                            {
+                                Debug.WriteLine("-------Deferred release: waiting " + (i * 1000).ToString());
+                            }
+                        }
+                        Debug.WriteLine("-------Deferred release: release ");
+                        await Release(result.AcquisitionKey);
+                    }
+                    , deferredReleaseCancellationToken
+                    );
+            }
             return result;
         }
 
@@ -76,14 +108,19 @@ namespace FBM.Services
                     await file.DeleteAsync();
                     released.AcquisitionKey = key;
                     released.Result = MutexOperationResultEnum.Released;
+
+                    // Cancel pending deferrred release task
+                    if (_deferredRelease != null && !_deferredRelease.IsCompleted)
+                    {
+                        _cancellationSource.Cancel();
+                        _cancellationSource.Dispose();
+                    }
                 }
                 else
                 {
                     released.Result = MutexOperationResultEnum.FailToRelease;
                 }
             }
-
-
 
             return released;
         }
