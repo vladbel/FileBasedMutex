@@ -14,6 +14,12 @@ namespace FBM.Background
     {
         void IBackgroundTask.Run(IBackgroundTaskInstance taskInstance)
         {
+            var task = Task.Run(async () => await Run());
+            task.Wait();
+        }
+
+        private async Task Run()
+        {
             Debug.WriteLine("--------------------FbmBackgroundTask.Run(): Start");
 
             //IMutex mutex = new RefreshTokenMutex();
@@ -24,15 +30,15 @@ namespace FBM.Background
             try
             {
                 Debug.WriteLine("--------------------FbmBackgroundTask.Run(): enter mutex");
-                mutexAquired =  mutex.Aquire(5000).Result;
+                mutexAquired = await mutex.Aquire(5000);
                 Debug.WriteLine("--------------------FbmBackgroundTask.Run():" + mutexAquired.ToString());
 
-                if ( (mutexAquired.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue )
+                if ((mutexAquired.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue)
                 {
                     // Do work here
-                    for (var i = 0; i < 5; i++)
+                    for (var i = 0; i < 10; i++)
                     {
-                        Task.Delay(1000);
+                        await Task.Delay(1000);
                         Debug.WriteLine("--------------------FbmBackgroundTask.Run():" + "doing some work");
                     }
                 }
@@ -44,15 +50,15 @@ namespace FBM.Background
             }
             finally
             {
-                if (mutexAquired != null && (mutexAquired.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue)
+                if (mutexAquired != null && mutexAquired.ResultIs(MutexOperationResultEnum.Aquired))
                 {
-                    mutexReleased = mutex.Release(mutexAquired.AcquisitionKey).Result;
+                    mutexReleased = await mutex.Release(mutexAquired.AcquisitionKey);
                     Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + mutexReleased.ToString());
 
-                    if (mutexReleased == null || (mutexReleased.Result & MutexOperationResultEnum.Released) == MutexOperationResultEnum.NoValue)
+                    if (mutexReleased == null || !mutexReleased.ResultIs(MutexOperationResultEnum.Released))
                     {
-                        mutexReleased = mutex.Dispose().Result;
-                        Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + "Dispose: " + mutexReleased.ToString());
+                        var mutexCleared = await mutex.Clear();
+                        Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + "Dispose: " + mutexCleared.ToString());
                     }
                 }
             }

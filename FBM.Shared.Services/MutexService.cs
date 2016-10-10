@@ -13,26 +13,34 @@ namespace FBM.Services
     internal class MutexService : IMutexService
     {
         private const string FILE = "mutex.txt";
-
-        private Task _deferredRelease;
-        private CancellationTokenSource _cancellationSource;
+        private const int TIMEOUT_MSEC = 15000;
 
         private StorageFolder Folder
         {
             get { return ApplicationData.Current.TemporaryFolder; }
         }
 
-        public async Task<MutexOperationResult> Aquire ( int msec = 0)
+        public async Task<MutexOperationResult> Aquire ( int milliseconds = 0)
         {
             var result = new MutexOperationResult();
+            StorageFile file = null;
 
-            var files = await Folder.GetFilesAsync();
-            var file = files.FirstOrDefault(f => f.Name.StartsWith(FILE));
+            try
+            {
+                file = await GetFile();
+            }
+            catch
+            {
+                result.Result = MutexOperationResultEnum.ExceptionFileSystem;
+                return result;
+            }
+
 
             if (file == null)
             {
                 try
                 {
+                    result.Result = MutexOperationResultEnum.Free;
                     var key = Guid.NewGuid().ToString();
                     file = await Folder.CreateFileAsync(FILE);
                     await FileIO.WriteTextAsync(file, key);
@@ -41,64 +49,54 @@ namespace FBM.Services
                 }
                 catch (Exception)
                 {
-                    result.Result = MutexOperationResultEnum.UnknownException;
+                    result.Result = MutexOperationResultEnum.ExceptionFileSystem;
                 }
 
             }
-            else if (msec > 1)
+            else
             {
-                for ( var i = 0; i < 5; i++ )
+                // First attempt to intercept mutex: force clear if mutex aquired longer then TIMEOUT
+                var forcedCleared = await ForceClearIfTimeoutExpired();
+                if (forcedCleared.ResultIs(MutexOperationResultEnum.Cleared))
                 {
-                    await Task.Delay(msec / 5);
-                    result = await Aquire();
-                    if ((result.Result & MutexOperationResultEnum.Aquired) == MutexOperationResultEnum.Aquired)
-                    {
-                        return result;
-                    }
+                    var forcedAquired = await Aquire();
+                    result.Combine(forcedCleared);
+                    result.Combine(forcedAquired);
+                    return result;
                 }
-                result.Result = MutexOperationResultEnum.FailToAquire;
-            }
 
-            if ((result.Result & MutexOperationResultEnum.Aquired) == MutexOperationResultEnum.Aquired)
-            {
-                _cancellationSource = new CancellationTokenSource();
-                var deferredReleaseCancellationToken = _cancellationSource.Token;
-                _deferredRelease = Task.Run(
-                    async () =>
+                // Second attempt to intercept mutex: await specifyed delay
+                if (milliseconds >= 1000)
+                {
+                    for (var i = 0; i < Math.Min( milliseconds, TIMEOUT_MSEC) / 1000; i++) // There is no need to wait longer then TIMEOUT,
+                                                                                           // if mutex not released it indicates greater failure
                     {
-                        for (var i = 0; i < 10; i++)
+                        await Task.Delay(1000);
+                        var delayedAquired = await Aquire();
+                        if (delayedAquired.ResultIs( MutexOperationResultEnum.Aquired))
                         {
-                            await Task.Delay(1000);
-                            if (deferredReleaseCancellationToken.IsCancellationRequested)
-                            {
-                                Debug.WriteLine("-------Deferred release: cancel");
-                                deferredReleaseCancellationToken.ThrowIfCancellationRequested();
-                            }
-                            else
-                            {
-                                Debug.WriteLine("-------Deferred release: waiting " + (i * 1000).ToString());
-                            }
+                            return delayedAquired;
                         }
-                        Debug.WriteLine("-------Deferred release: release ");
-                        await Release(result.AcquisitionKey);
                     }
-                    , deferredReleaseCancellationToken
-                    );
+                    result.Result = MutexOperationResultEnum.FailToAquire;
+                }
             }
+            SetDeferredMutexRelease(result); // Will launch task which release mutex when timeout
+
             return result;
         }
+
 
 
         public async Task<MutexOperationResult>Release (string key)
         {
             var released = new MutexOperationResult();
 
-            var files = await Folder.GetFilesAsync();
-            var file = files.FirstOrDefault(f => f.Name.StartsWith(FILE));
+            var file = await GetFile();
 
             if (file == null)
             {
-                released.Result = MutexOperationResultEnum.FailToRelease;
+                released.Result = MutexOperationResultEnum.Free;
             }
             else
             {
@@ -109,12 +107,7 @@ namespace FBM.Services
                     released.AcquisitionKey = key;
                     released.Result = MutexOperationResultEnum.Released;
 
-                    // Cancel pending deferrred release task
-                    if (_deferredRelease != null && !_deferredRelease.IsCompleted)
-                    {
-                        _cancellationSource.Cancel();
-                        _cancellationSource.Dispose();
-                    }
+                    CancelDeferredMutexRelease();
                 }
                 else
                 {
@@ -125,29 +118,114 @@ namespace FBM.Services
             return released;
         }
 
-        public async Task<MutexOperationResult> Dispose()
+        public async Task<MutexOperationResult> Clear()
         {
-            var disposed = new MutexOperationResult();
+            var cleared = new MutexOperationResult();
             try
             {
-                var files = await Folder.GetFilesAsync();
-                var file = files.FirstOrDefault(f => f.Name.StartsWith(FILE));
-
+                var file = await GetFile();
                 if (file != null)
                 {
                     await file.DeleteAsync();
-                    disposed.Result = MutexOperationResultEnum.Disposed;
+                    cleared.Result = MutexOperationResultEnum.Cleared;
+                    CancelDeferredMutexRelease();
                 }
                 else
                 {
-                    disposed.Result = MutexOperationResultEnum.FailToDispose;
+                    cleared.Result = MutexOperationResultEnum.Free;
                 }
             }
             catch
             {
-                disposed.Result = MutexOperationResultEnum.UnknownException;
+                cleared.Result = MutexOperationResultEnum.ExceptionFileSystem | MutexOperationResultEnum.FailToClear;
             }
-            return disposed;
+            return cleared;
         }
+
+        private async Task<MutexOperationResult> ForceClearIfTimeoutExpired()
+        {
+            var result = new MutexOperationResult();
+
+            try
+            {
+                var file = await GetFile();
+                if (file != null)
+                {
+                    var currentTime = DateTime.Now;
+                    var fileTimeStamp = file.DateCreated;
+
+                    if ((currentTime - fileTimeStamp).TotalMilliseconds > TIMEOUT_MSEC * 2)
+                    {
+                        var cleared = await Clear();
+                        result.Combine(cleared);
+                        Debug.WriteLine("-------Force clear: " + cleared.ToString());
+                    }
+                }
+                else
+                {
+                    result.Result = MutexOperationResultEnum.Free;
+                }
+            }
+            catch
+            {
+                result.Result = MutexOperationResultEnum.ExceptionFileSystem | MutexOperationResultEnum.FailToClear;
+            }
+
+            return result;
+        }
+
+        private async Task<StorageFile> GetFile()
+        {
+            var files = await Folder.GetFilesAsync();
+            var file = files.FirstOrDefault(f => f.Name.StartsWith(FILE));
+            return file;
+        }
+
+        #region Deferred Release
+
+        private Task _deferredRelease;
+        private CancellationTokenSource _deferredReleaseCancellationSource;
+        private void SetDeferredMutexRelease(MutexOperationResult result)
+        {
+            if ((result.Result & MutexOperationResultEnum.Aquired) == MutexOperationResultEnum.Aquired)
+            {
+                _deferredReleaseCancellationSource = new CancellationTokenSource();
+                var deferredReleaseCancellationToken = _deferredReleaseCancellationSource.Token;
+                _deferredRelease = Task.Run(
+                    async () =>
+                    {
+                        var checkIfCancelledPeriod = 1000;
+                        for (var i = 0; i < TIMEOUT_MSEC/ checkIfCancelledPeriod; i++)
+                        {
+                            await Task.Delay(checkIfCancelledPeriod);
+                            if (deferredReleaseCancellationToken.IsCancellationRequested)
+                            {
+                                Debug.WriteLine("-------Deferred release: cancel");
+                                deferredReleaseCancellationToken.ThrowIfCancellationRequested();
+                            }
+                            else
+                            {
+                                Debug.WriteLine("-------Deferred release: waiting " + (i * 1000).ToString());
+                            }
+                        }
+
+                        var released = await Release(result.AcquisitionKey);
+                        Debug.WriteLine("-------Deferred release: " + released.ToString());
+                    }
+                    , deferredReleaseCancellationToken
+                    );
+            }
+        }
+
+        private void CancelDeferredMutexRelease()
+        {
+            // Cancel pending deferrred release task
+            if (_deferredRelease != null && !_deferredRelease.IsCompleted)
+            {
+                _deferredReleaseCancellationSource.Cancel();
+                _deferredReleaseCancellationSource.Dispose();
+            }
+        }
+        #endregion
     }
 }

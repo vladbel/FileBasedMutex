@@ -10,18 +10,16 @@ namespace FBM.Kit.Services
     public enum  MutexOperationResultEnum
     {
         NoValue = 0,
-        Opened = 1,
-        Created = 2,
-        Aquired = 4,
-        Released = 8,
-        Disposed = 16,
-        AbadonedException = 32,
-        UnknownException = 64,
-        FailToCreate = 128,
-        FailToAquire = 256,
-        FailToRelease = 512,
-        FailToDispose = 1024,
-        SynchronizationException = 2048
+        Free = 1,
+        Aquired = 2,
+        Released = 4,
+        Cleared = 8,
+        FailToCreate =16,
+        FailToAquire = 32,
+        FailToRelease = 64,
+        FailToClear = 128,
+        ExceptionUnknown = 256,
+        ExceptionFileSystem = 512
     }
 
     public class MutexOperationResult
@@ -47,9 +45,14 @@ namespace FBM.Kit.Services
                     _history = new List<string>();
                 }
 
-                _history.Add(((_result ^ value) & value).ToString());
-                _result = value;
+                _history.Add(value.ToString());
+                _result = _result | value;
             }
+        }
+
+        public bool ResultIs( MutexOperationResultEnum resultToCheck)
+        {
+            return (_result & resultToCheck) == resultToCheck;
         }
 
         public string AcquisitionKey { get; set; }
@@ -58,6 +61,11 @@ namespace FBM.Kit.Services
         {
             _history.AddRange(anotherResult._history);
             _result = _result | anotherResult._result;
+
+            if ( anotherResult.ResultIs(MutexOperationResultEnum.Aquired))
+            {
+                this.AcquisitionKey = anotherResult.AcquisitionKey;
+            }
         }
 
         public override string ToString()
@@ -73,6 +81,6 @@ namespace FBM.Kit.Services
     {
         Task<MutexOperationResult> Aquire( int milliseconds = 0);
         Task<MutexOperationResult> Release(string key);
-        Task<MutexOperationResult> Dispose();
+        Task<MutexOperationResult> Clear();
     }
 }

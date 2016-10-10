@@ -126,7 +126,7 @@ namespace FBM.Core.ViewModels
         {
             if (ForceDispose)
             {
-                var disposed = await _mutex.Dispose();
+                var disposed = await _mutex.Clear();
                 MutexStatus = disposed.ToString();
                 return;
             }
