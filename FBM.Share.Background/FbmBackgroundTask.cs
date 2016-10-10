@@ -52,13 +52,13 @@ namespace FBM.Background
             {
                 if (mutexAquired != null && mutexAquired.ResultIs(MutexOperationResultEnum.Aquired))
                 {
-                    mutexReleased = await mutex.Release(mutexAquired.AcquisitionKey);
+                    mutexReleased = await mutex.ReleaseAsync(mutexAquired.AcquisitionKey);
                     Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + mutexReleased.ToString());
 
                     if (mutexReleased == null || !mutexReleased.ResultIs(MutexOperationResultEnum.Released))
                     {
-                        var mutexCleared = await mutex.Clear();
-                        Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + "Dispose: " + mutexCleared.ToString());
+                        var mutexCleared = await mutex.ClearAsync();
+                        Debug.WriteLine("--------------------FbmBackgroundTask.Run(): " + "Clear: " + mutexCleared.ToString());
                     }
                 }
             }

@@ -96,7 +96,7 @@ namespace FBM.Core.ViewModels
                                  await Task.Delay(_msec);
                                  Debug.WriteLine("Running: " + (i * Milliseconds).ToString());
                              }
-                             releaseResult = await _mutex.Release(aquiredResult.AcquisitionKey);
+                             releaseResult = await _mutex.ReleaseAsync(aquiredResult.AcquisitionKey);
                              result = (aquiredResult.Result | releaseResult.Result).ToString();
                          }
 
@@ -126,7 +126,7 @@ namespace FBM.Core.ViewModels
         {
             if (ForceDispose)
             {
-                var disposed = await _mutex.Clear();
+                var disposed = await _mutex.ClearAsync();
                 MutexStatus = disposed.ToString();
                 return;
             }
@@ -138,7 +138,7 @@ namespace FBM.Core.ViewModels
             }
             var result = await Task.Run( () => 
                     {
-                        return _mutex.Release(_acquisitionResult.AcquisitionKey);
+                        return _mutex.ReleaseAsync(_acquisitionResult.AcquisitionKey);
                     });
 
             MutexStatus = result.ToString();

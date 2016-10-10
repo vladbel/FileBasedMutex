@@ -88,7 +88,7 @@ namespace FBM.Services
 
 
 
-        public async Task<MutexOperationResult>Release (string key)
+        public async Task<MutexOperationResult>ReleaseAsync (string key)
         {
             var released = new MutexOperationResult();
 
@@ -118,7 +118,7 @@ namespace FBM.Services
             return released;
         }
 
-        public async Task<MutexOperationResult> Clear()
+        public async Task<MutexOperationResult> ClearAsync()
         {
             var cleared = new MutexOperationResult();
             try
@@ -156,7 +156,7 @@ namespace FBM.Services
 
                     if ((currentTime - fileTimeStamp).TotalMilliseconds > TIMEOUT_MSEC * 2)
                     {
-                        var cleared = await Clear();
+                        var cleared = await ClearAsync();
                         result.Combine(cleared);
                         Debug.WriteLine("-------Force clear: " + cleared.ToString());
                     }
@@ -209,7 +209,7 @@ namespace FBM.Services
                             }
                         }
 
-                        var released = await Release(result.AcquisitionKey);
+                        var released = await ReleaseAsync(result.AcquisitionKey);
                         Debug.WriteLine("-------Deferred release: " + released.ToString());
                     }
                     , deferredReleaseCancellationToken
