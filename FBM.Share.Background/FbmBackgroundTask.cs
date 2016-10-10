@@ -30,7 +30,7 @@ namespace FBM.Background
             try
             {
                 Debug.WriteLine("--------------------FbmBackgroundTask.Run(): enter mutex");
-                mutexAquired = await mutex.Aquire(5000);
+                mutexAquired = await mutex.AquireAsync(5000);
                 Debug.WriteLine("--------------------FbmBackgroundTask.Run():" + mutexAquired.ToString());
 
                 if ((mutexAquired.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue)

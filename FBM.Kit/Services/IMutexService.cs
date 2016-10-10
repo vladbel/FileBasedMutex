@@ -79,8 +79,8 @@ namespace FBM.Kit.Services
     }
     public interface IMutexService
     {
-        Task<MutexOperationResult> Aquire( int milliseconds = 0);
-        Task<MutexOperationResult> Release(string key);
-        Task<MutexOperationResult> Clear();
+        Task<MutexOperationResult> AquireAsync( int milliseconds = 0);
+        Task<MutexOperationResult> ReleaseAsync(string key);
+        Task<MutexOperationResult> ClearAsync();
     }
 }

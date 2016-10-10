@@ -20,7 +20,7 @@ namespace FBM.Services
             get { return ApplicationData.Current.TemporaryFolder; }
         }
 
-        public async Task<MutexOperationResult> Aquire ( int milliseconds = 0)
+        public async Task<MutexOperationResult> AquireAsync ( int milliseconds = 0)
         {
             var result = new MutexOperationResult();
             StorageFile file = null;
@@ -59,7 +59,7 @@ namespace FBM.Services
                 var forcedCleared = await ForceClearIfTimeoutExpired();
                 if (forcedCleared.ResultIs(MutexOperationResultEnum.Cleared))
                 {
-                    var forcedAquired = await Aquire();
+                    var forcedAquired = await AquireAsync();
                     result.Combine(forcedCleared);
                     result.Combine(forcedAquired);
                     return result;
@@ -72,7 +72,7 @@ namespace FBM.Services
                                                                                            // if mutex not released it indicates greater failure
                     {
                         await Task.Delay(1000);
-                        var delayedAquired = await Aquire();
+                        var delayedAquired = await AquireAsync();
                         if (delayedAquired.ResultIs( MutexOperationResultEnum.Aquired))
                         {
                             return delayedAquired;

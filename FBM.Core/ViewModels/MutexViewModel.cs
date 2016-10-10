@@ -87,7 +87,7 @@ namespace FBM.Core.ViewModels
 
             await Task.Run(async () =>
                      {
-                         aquiredResult = await _mutex.Aquire(_msec);
+                         aquiredResult = await _mutex.AquireAsync(_msec);
 
                          if ((aquiredResult.Result & MutexOperationResultEnum.Aquired) != MutexOperationResultEnum.NoValue)
                          {
@@ -115,7 +115,7 @@ namespace FBM.Core.ViewModels
             _acquisitionResult = await Task.Run( () => 
                 {
                     Debug.WriteLine("-----------------------ThreadId = " + Environment.CurrentManagedThreadId);
-                    return _mutex.Aquire(_msec);
+                    return _mutex.AquireAsync(_msec);
                 });
             MutexStatus = _acquisitionResult.ToString();
         }
