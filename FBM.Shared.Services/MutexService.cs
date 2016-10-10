@@ -20,7 +20,7 @@ namespace FBM.Services
             get { return ApplicationData.Current.TemporaryFolder; }
         }
 
-        public async Task<MutexOperationResult> AquireAsync ( int milliseconds = 0)
+        public async Task<MutexOperationResult> AquireAsync(int milliseconds = 0)
         {
             var result = new MutexOperationResult();
             StorageFile file = null;
@@ -46,6 +46,7 @@ namespace FBM.Services
                     await FileIO.WriteTextAsync(file, key);
                     result.AcquisitionKey = key;
                     result.Result = MutexOperationResultEnum.Aquired;
+                    SetDeferredMutexRelease(result); // Will launch task which release mutex when timeout
                 }
                 catch (Exception)
                 {
@@ -68,27 +69,27 @@ namespace FBM.Services
                 // Second attempt to intercept mutex: await specifyed delay
                 if (milliseconds >= 1000)
                 {
-                    for (var i = 0; i < Math.Min( milliseconds, TIMEOUT_MSEC) / 1000; i++) // There is no need to wait longer then TIMEOUT,
-                                                                                           // if mutex not released it indicates greater failure
+                    for (var i = 0; i < Math.Min(milliseconds, TIMEOUT_MSEC) / 1000; i++) // There is no need to wait longer then TIMEOUT,
+                                                                                          // if mutex not released it indicates greater failure
                     {
                         await Task.Delay(1000);
                         var delayedAquired = await AquireAsync();
-                        if (delayedAquired.ResultIs( MutexOperationResultEnum.Aquired))
+                        result.Combine(delayedAquired);
+                        if (delayedAquired.ResultIs(MutexOperationResultEnum.Aquired))
                         {
-                            return delayedAquired;
+                            return result;
                         }
                     }
                     result.Result = MutexOperationResultEnum.FailToAquire;
                 }
             }
-            SetDeferredMutexRelease(result); // Will launch task which release mutex when timeout
 
             return result;
         }
 
 
 
-        public async Task<MutexOperationResult>ReleaseAsync (string key)
+        public async Task<MutexOperationResult> ReleaseAsync(string key)
         {
             var released = new MutexOperationResult();
 
@@ -195,7 +196,7 @@ namespace FBM.Services
                     async () =>
                     {
                         var checkIfCancelledPeriod = 1000;
-                        for (var i = 0; i < TIMEOUT_MSEC/ checkIfCancelledPeriod; i++)
+                        for (var i = 0; i < TIMEOUT_MSEC / checkIfCancelledPeriod; i++)
                         {
                             await Task.Delay(checkIfCancelledPeriod);
                             if (deferredReleaseCancellationToken.IsCancellationRequested)
