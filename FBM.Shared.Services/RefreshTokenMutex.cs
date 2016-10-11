@@ -33,7 +33,7 @@ namespace FBM.Services
             }
             return mutex;
         }
-        public MutexOperationResult Aquire( int milliseconds = 0)
+        public MutexOperationResult Acquire( int milliseconds = 0)
         {
             Mutex mutex = null;
             var result = new MutexOperationResult();
@@ -48,62 +48,62 @@ namespace FBM.Services
                 }
                 else
                 {
-                    result.Result = MutexOperationResultEnum.Aquired;
+                    result.Result = MutexOperationResultEnum.Acquired;
                 }
             }
             else
             {
-                result.Result = MutexOperationResultEnum.Aquired;
+                result.Result = MutexOperationResultEnum.Acquired;
             }
 
-             result.Result = result.Result | Aquire(mutex, milliseconds).Result;
+             result.Result = result.Result | Acquire(mutex, milliseconds).Result;
             return result;
         }
 
-        private MutexOperationResult Aquire( Mutex mutex, int milliseconds = 0)
+        private MutexOperationResult Acquire( Mutex mutex, int milliseconds = 0)
         {
-            MutexOperationResult mutexAquired = new MutexOperationResult();
+            MutexOperationResult mutexAcquired = new MutexOperationResult();
             if (mutex != null)
             {
                 try
                 {
                     if ( mutex.WaitOne(milliseconds))
                     {
-                        mutexAquired.Result = MutexOperationResultEnum.Aquired;
+                        mutexAcquired.Result = MutexOperationResultEnum.Acquired;
                     }
                     else
                     {
-                        mutexAquired.Result = MutexOperationResultEnum.FailToAquire;
+                        mutexAcquired.Result = MutexOperationResultEnum.FailToAcquire;
                     }
                 }
                 catch (AbandonedMutexException)
                 {
                     // we may try to recover
-                    mutexAquired.Result = MutexOperationResultEnum.ExceptionUnknown;
+                    mutexAcquired.Result = MutexOperationResultEnum.ExceptionUnknown;
                     mutex.Dispose();
-                    mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.Cleared;
+                    mutexAcquired.Result = mutexAcquired.Result | MutexOperationResultEnum.Cleared;
                     mutex = CreateMutex();
                     
                     if ( mutex != null)
                     {
-                        mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.Aquired;
+                        mutexAcquired.Result = mutexAcquired.Result | MutexOperationResultEnum.Acquired;
                         if (mutex.WaitOne(milliseconds))
                             {
-                            mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.Aquired;
+                            mutexAcquired.Result = mutexAcquired.Result | MutexOperationResultEnum.Acquired;
                         }
                         else
                         {
-                            mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.FailToAquire;
+                            mutexAcquired.Result = mutexAcquired.Result | MutexOperationResultEnum.FailToAcquire;
                         }
                     }
                     else
                     {
-                        mutexAquired.Result = mutexAquired.Result | MutexOperationResultEnum.FailToCreate;
+                        mutexAcquired.Result = mutexAcquired.Result | MutexOperationResultEnum.FailToCreate;
                     }
                 }
 
             }
-            return mutexAquired;
+            return mutexAcquired;
         }
 
         public MutexOperationResult Release(bool forceDisposeIfNotReleased = false)
@@ -195,9 +195,9 @@ namespace FBM.Services
             }
         }
 
-        public Task<MutexOperationResult> AquireAsync(int milliseconds)
+        public Task<MutexOperationResult> AcquireAsync(int milliseconds)
         {
-            return Task.Run(() => Aquire(milliseconds));
+            return Task.Run(() => Acquire(milliseconds));
         }
     }
 }

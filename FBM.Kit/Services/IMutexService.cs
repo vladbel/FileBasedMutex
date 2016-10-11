@@ -11,11 +11,11 @@ namespace FBM.Kit.Services
     {
         NoValue = 0,
         Free = 1,
-        Aquired = 2,
+        Acquired = 2,
         Released = 4,
         Cleared = 8,
         FailToCreate =16,
-        FailToAquire = 32,
+        FailToAcquire = 32,
         FailToRelease = 64,
         FailToClear = 128,
         ExceptionUnknown = 256,
@@ -62,7 +62,7 @@ namespace FBM.Kit.Services
             _history.AddRange(anotherResult._history);
             _result = _result | anotherResult._result;
 
-            if ( anotherResult.ResultIs(MutexOperationResultEnum.Aquired))
+            if ( anotherResult.ResultIs(MutexOperationResultEnum.Acquired))
             {
                 this.AcquisitionKey = anotherResult.AcquisitionKey;
             }
@@ -79,7 +79,7 @@ namespace FBM.Kit.Services
     }
     public interface IMutexService
     {
-        Task<MutexOperationResult> AquireAsync( int milliseconds = 0);
+        Task<MutexOperationResult> AcquireAsync( int milliseconds = 0);
         Task<MutexOperationResult> ReleaseAsync(string key);
         Task<MutexOperationResult> ClearAsync();
     }

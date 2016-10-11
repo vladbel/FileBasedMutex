@@ -20,7 +20,7 @@ namespace FBM.Services
             get { return ApplicationData.Current.TemporaryFolder; }
         }
 
-        public async Task<MutexOperationResult> AquireAsync(int milliseconds = 0)
+        public async Task<MutexOperationResult> AcquireAsync(int milliseconds = 0)
         {
             var result = new MutexOperationResult();
             StorageFile file = null;
@@ -45,7 +45,7 @@ namespace FBM.Services
                     file = await Folder.CreateFileAsync(FILE);
                     await FileIO.WriteTextAsync(file, key);
                     result.AcquisitionKey = key;
-                    result.Result = MutexOperationResultEnum.Aquired;
+                    result.Result = MutexOperationResultEnum.Acquired;
                     SetDeferredMutexRelease(result); // Will launch task which release mutex when timeout
                 }
                 catch (Exception)
@@ -56,13 +56,13 @@ namespace FBM.Services
             }
             else
             {
-                // First attempt to intercept mutex: force clear if mutex aquired longer then TIMEOUT
+                // First attempt to intercept mutex: force clear if mutex Acquired longer then TIMEOUT
                 var forcedCleared = await ForceClearIfTimeoutExpired();
                 if (forcedCleared.ResultIs(MutexOperationResultEnum.Cleared))
                 {
-                    var forcedAquired = await AquireAsync();
+                    var forcedAcquired = await AcquireAsync();
                     result.Combine(forcedCleared);
-                    result.Combine(forcedAquired);
+                    result.Combine(forcedAcquired);
                     return result;
                 }
 
@@ -73,14 +73,14 @@ namespace FBM.Services
                                                                                           // if mutex not released it indicates greater failure
                     {
                         await Task.Delay(1000);
-                        var delayedAquired = await AquireAsync();
-                        result.Combine(delayedAquired);
-                        if (delayedAquired.ResultIs(MutexOperationResultEnum.Aquired))
+                        var delayedAcquired = await AcquireAsync();
+                        result.Combine(delayedAcquired);
+                        if (delayedAcquired.ResultIs(MutexOperationResultEnum.Acquired))
                         {
                             return result;
                         }
                     }
-                    result.Result = MutexOperationResultEnum.FailToAquire;
+                    result.Result = MutexOperationResultEnum.FailToAcquire;
                 }
             }
 
@@ -188,7 +188,7 @@ namespace FBM.Services
         private CancellationTokenSource _deferredReleaseCancellationSource;
         private void SetDeferredMutexRelease(MutexOperationResult result)
         {
-            if ((result.Result & MutexOperationResultEnum.Aquired) == MutexOperationResultEnum.Aquired)
+            if (result.ResultIs(MutexOperationResultEnum.Acquired))
             {
                 _deferredReleaseCancellationSource = new CancellationTokenSource();
                 var deferredReleaseCancellationToken = _deferredReleaseCancellationSource.Token;
