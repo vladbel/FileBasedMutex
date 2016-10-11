@@ -117,6 +117,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\FBM.Share.Background\FBM.Share.Background.projitems" Label="Shared" />
+  <Import Project="..\FBM.Shared.Services\FBM.Shared.Services.projitems" Label="Shared" />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
